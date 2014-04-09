@@ -4,7 +4,7 @@ static PyObject * pymath_divides(PyObject *self, PyObject *args)
 {
 	long long numerator, denominator;
 	
-	if (!PyParseTuple(args, "L", &numerator, &denominator))
+	if (!PyArg_ParseTuple(args, "L", &numerator, &denominator))
 	{
 		return NULL;
 	}

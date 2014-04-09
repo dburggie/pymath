@@ -1,5 +1,6 @@
 #include "pymath.h"
 
+
 static PyMethodDef pymathMethods[] = 
 {
 	{ "divides", pymath_divides, METH_VARARGS, 
@@ -9,10 +10,11 @@ static PyMethodDef pymathMethods[] =
 	
 	{ NULL, NULL, 0, NULL }
 	
-}
+};
 
 PyMODINIT_FUNC
 initpymath(void)
 {
 	(void) Py_InitModule("pymath", pymathMethods);
 }
+
