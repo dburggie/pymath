@@ -1,21 +1,22 @@
 
-SRC = src/*
+SETUP = python2 setup.py
+SRC = src/pymath.c src/pymath.h src/divides.c
 MOD = pymath.so
 
-all: ${MOD}
+all: clean ${MOD}
 
 full:
-	@python2 setup.py build
+	${SETUP} build
 
 ${MOD}: ${SRC}
-	@python2 setup.py build_ext --inplace
+	${SETUP} build_ext --inplace
 
 install:
-	@python2 setup.py install	
+	${SETUP} install
 
 clean:
 	@echo "cleaning..."
-	@python2 setup.py clean --all
-	@rm pymath.so
+	${SETUP} clean --all
+	@rm -f pymath.so
 
 	

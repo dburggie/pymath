@@ -3,8 +3,12 @@
 
 static PyMethodDef pymathMethods[] = 
 {
+	
 	{ "divides", pymath_divides, METH_VARARGS, 
 			"Returns true if first arg divides second arg." },
+	
+	{ "pow", pymath_pow, METH_VARARGS,
+			"Returns (a^b) mod c." },
 	
 	//...
 	

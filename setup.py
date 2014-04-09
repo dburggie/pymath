@@ -3,7 +3,8 @@ from distutils.core import setup, Extension
 pymathmodule = Extension('pymath',
 		sources = [
 			'src/pymath.c',
-			'src/divides.c'
+			'src/divides.c',
+			'src/pow.c'
 		])
 
 setup (name = 'pymathmodule',
