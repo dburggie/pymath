@@ -7,6 +7,6 @@ pymathmodule = Extension('pymath',
 		])
 
 setup (name = 'pymathmodule',
-       version = '0.01',
+       version = '1.00',
        description = 'Provides fast math functions.',
        ext_modules = [pymathmodule])
