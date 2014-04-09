@@ -1,15 +1,15 @@
 #include "pymath.h"
 
-static PyObject * pymath_divides(PyObject *self, PyObject *args)
+PyObject * pymath_divides(PyObject *self, PyObject *args)
 {
-	long long numerator, denominator;
+	long long n, d;
 	
-	if (!PyArg_ParseTuple(args, "L", &numerator, &denominator))
+	if (!PyArg_ParseTuple(args, "LL", &d, &n))
 	{
 		return NULL;
 	}
 	
-	if (numerator % denominator)
+	if (n % d)
 	{
 		return Py_BuildValue("i", 0);
 	}
