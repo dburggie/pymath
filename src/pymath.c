@@ -1,7 +1,7 @@
 #include "pymath.h"
 
 
-static PyMethodDef pymathMethods[] = 
+PyMethodDef pymathMethods[] = 
 {
 	
 	{ "divides", pymath_divides, METH_VARARGS, 
