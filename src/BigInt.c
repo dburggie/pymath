@@ -1,48 +1,58 @@
+#include "BigInt.h"
+#include <stdlib.h>
 
-#include "pymath.h"
+/* ##### private method declarations ##### */
 
-/* Put this in the header?
-extern PyTypeObject BigIntT;
-extern PyMethodDef BigIntMethods[];
-typedef struct {
-	PyObject_HEAD
-	
-	// add fields here
-	
-} BigIntObj;
-*/
+// ...
 
-PyTypeObject BigIntT =
+
+
+
+/* ##### public method definitions ##### */
+BigInt * newBigInt(void)
 {
-	PyObject_HEAD_INIT(NULL)
-	0,
-	"bigint.BigInt",
-	sizeof(BigIntObj),
-	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	Py_TPFLAGS_DEFAULT,
-	"Big Integer",
+	
+	//allocate memory
+	BigInt * object = (BigInt *) malloc(sizeof(BigInt));
+	if (object == NULL) { return NULL; }
+	
+	BigIntChunk * chunk = (BigIntChunk *) malloc(sizeof(BigIntChunk));
+	if (chunk == NULL) { free(object); return NULL; }
+	
+	//initialize data
+	object->first = chunk;
+	object->last = chunk;
+	object->length = 1;
+	chunk->prev = NULL;
+	chunk->next = NULL;
+	chunk->length = 1;
+	chunk->value[0] = 0;
+	
+	return object;
+	
 }
 
-PyMethodDef BigIntMethods[] = { {NULL} };
 
-#ifndef PyMODINIT_FUNC
-#define PyMODINIT_FUNC void
-#endif
 
-PyTypeObject * initBigInt(void)
+void freeBigInt(BigInt * object)
 {
+	//let's avoid freeing a null pointer
+	if (object == NULL) return;
 	
-	BigIntT.tp_new = PyType_GenericNew;
-	if (PyType_READY( &BigIntT ) < 0)
+	//delete all the chunks
+	BigIntChunk * chunk = object->first;
+	BigIntChunk * next;
+	while (chunk != NULL)
 	{
-		return NULL; 
+		next = chunk->next;
+		free(chunk);
+		chunk = next;
 	}
 	
-	
-	PyINCREF(&BigIntT);
-	
-	return &BigIntT;
-	
-	
+	//free the rest of the object
+	free(object);
 }
+
+
+
 
