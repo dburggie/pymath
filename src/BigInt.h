@@ -3,14 +3,33 @@
 
 #define CHUNKWIDTH 100
 
-//types
+#include <stdio.h>
+
+/* ##### types ##### */
+
 typedef struct BigIntChunk BigIntChunk;
 typedef struct BigInt BigInt;
 
-//methods
+
+
+/* ##### methods ##### */
+
+/** Allocates memory for a new big int object
+ *  returns new BigInt object initialized to zero.
+ */
 BigInt * newBigInt(void);
 void freeBigInt(BigInt * object);
 
+/** Sets value of a BigInt object to the value in the third argument.
+ *  @param self the object the value will be copied into
+ *  @param length the length of the value array
+ *  @param value a little endian list of int values representing the value
+ */
+int setValue(BigInt * self, int length, int * value); // value is a little endian list of ints
+
+
+
+/* ##### structures ##### */
 
 struct BigIntChunk
 {
@@ -19,7 +38,7 @@ struct BigIntChunk
 	BigIntChunk *next;
 	int length;
 	
-	long long value[CHUNKWIDTH];
+	int value[CHUNKWIDTH];
 	
 };
 
