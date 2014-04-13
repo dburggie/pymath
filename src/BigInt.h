@@ -26,6 +26,7 @@ void freeBigInt(BigInt * object);
  *  @param value a little endian list of int values representing the value
  */
 int setValue(BigInt * self, int length, int * value); // value is a little endian list of ints
+char * toString(BigInt * self);
 
 
 

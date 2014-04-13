@@ -9,6 +9,11 @@ static void reset(BigInt * self);
 static int append(BigInt * self, BigIntChunk * chunk);
 static BigIntChunk * newChunk(void);
 
+static char hex[] = {
+		'0', '1', '2', '3', '4', '5', '6', '7',
+		'8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+	};
+
 
 
 
@@ -90,6 +95,53 @@ int setValue(BigInt * self, int length, int * value)
 	}
 	
 	return 0;
+}
+
+
+
+char * toString(BigInt * self)
+{
+	int bytecount = 0;
+	BigIntChunk * chunk = self->first;
+	while (chunk != NULL)
+	{
+		bytecount += sizeof(int) * chunk->length;
+		chunk = chunk->next;
+	}
+	
+	char * string = malloc( sizeof(char) * (2 * bytecount + 1) );
+	string[2* bytecount + 1] = '\0';
+	
+	int sIndex = 0, cIndex, i;
+	chunk = self->first;
+	
+	while (chunk != NULL)
+	{
+		for (cIndex = 0; cIndex < chunk->length; cIndex++)
+		{
+			i = chunk->value[cIndex];
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+			string[sIndex] = hex[i % 16];
+			sIndex++; i = i >> 4;
+		}
+		
+		chunk = chunk->next;
+	}
+	
+	return string;
 }
 
 
