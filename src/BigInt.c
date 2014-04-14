@@ -144,6 +144,105 @@ char * toString(BigInt * self)
 	return string;
 }
 
+BigInt * add(BigInt * self, BigInt * bi)
+{
+	
+	if (!self || !bi) return NULL;
+	
+	BigIntChunk * sChunk = self->first;
+	BigIntChunk * bChunk = bi->first;
+	
+	if (!sChunk || !bChunk) return NULL;
+	
+	long long sum = 0, carry = 0;
+	int sIndex = 0, bIndex = 0;
+	
+	while (1)
+	{
+		if (sIndex == sChunk->length)
+		{
+			if (sIndex < CHUNKWIDTH)
+			{
+				sChunk->value[sIndex] = 0;
+				sChunk->length++;
+			}
+			
+			else if (sChunk->next != NULL)
+			{
+				sIndex = 0;
+				sChunk = sChunk->next;
+			}
+			
+			else
+			{
+				append(self, newChunk());
+				sIndex = 0;
+			}
+		}
+		
+		
+		// check if more to add
+		if (bIndex == bChunk->length)
+		{
+			if (bChunk->next != NULL)
+			{
+				bIndex = 0;
+				bChunk = bChunk->next;
+			}
+			
+			else
+			{
+				while (carry > 0)
+				{
+					sum = carry;
+					sum += (long long) sChunk->value[sIndex];
+					sChunk->value[sIndex] = (int) (sum & 0xffffffff);
+					sIndex++;
+					carry = sum >> 32;
+					
+					//increment sIndex		
+					if (sIndex == sChunk->length)
+					{
+						
+						if (sIndex < CHUNKWIDTH)
+						{
+							sChunk->value[sIndex] = 0;
+							sChunk->length++;
+						}
+						
+						else if (sChunk->next != NULL)
+						{
+							sIndex = 0;
+							sChunk = sChunk->next;
+						}
+						
+						else
+						{
+							append(self, newChunk());
+							sIndex = 0;
+						}
+					}//done incrementing sIndex
+					
+				}
+				
+				break;
+			}
+		}
+		
+		
+		sum = carry;
+		sum += (long long) sChunk->value[sIndex];
+		sum += (long long) bChunk->value[bIndex];
+		sChunk->value[sIndex] = sum & 0xffffffff;
+		carry = sum >> 32;
+		sIndex++; bIndex++;
+		
+	}
+	
+	return self;
+	
+}
+
 
 
 /* ##### private member definitions ##### */
