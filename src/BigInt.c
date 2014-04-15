@@ -70,19 +70,28 @@ int setValue(BigInt * self, int length, int * value)
 	
 	ERROR(!self || !value);
 	
-	int numChunks = length / CHUNKWIDTH;
-	int tailLength = length % CHUNKWIDTH;
-	if (tailLength != 0) numChunks++;
+	//int numChunks = length / CHUNKWIDTH;
+	//int tailLength = length % CHUNKWIDTH;
+	//if (tailLength != 0) numChunks++;
 	
-	reset(self);
+	//reset(self);
 	
-	int index = 0, i;
+	int index = 0, i, overflow = 0;
 	BigIntChunk * activeChunk;
 	
-	while (index < length)
+	if (self->first)
+	{
+		activeChunk = self->first;
+	}
+	
+	else
 	{
 		activeChunk = newChunk();
-		ERROR(!activeChunk);
+		overflow = 1;
+	}
+	
+	while (1)
+	{
 		
 		for (i = 0; i < CHUNKWIDTH; i++)
 		{
@@ -91,7 +100,34 @@ int setValue(BigInt * self, int length, int * value)
 			if (++index >= length) break;
 		}
 		
-		ERROR(append(self, activeChunk));
+		if (overflow) ERROR(append(self, activeChunk));
+		
+		if (index >= length) break;
+		
+		if (activeChunk->next)
+		{
+			activeChunk = activeChunk->next;
+		}
+		
+		else
+		{
+			activeChunk = newChunk();
+			overflow = 1;
+		}
+		
+	}
+		
+	//trim the tail (if there is one);
+	activeChunk = activeChunk->next;
+	
+	self->last->next = NULL;
+	BigIntChunk * next = NULL;
+	
+	while (activeChunk != NULL)
+	{
+		next = activeChunk->next;
+		free(activeChunk);
+		activeChunk = next;
 	}
 	
 	return 0;
@@ -286,8 +322,7 @@ static BigIntChunk * newChunk(void)
 	
 	self->prev = NULL;
 	self->next = NULL;
-	self->length = 1;
-	self->value[0] = 0;
+	self->length = 0;
 	return self;
 }
 

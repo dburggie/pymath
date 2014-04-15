@@ -3,6 +3,7 @@
 
 int doTest(int test, char * methodName);
 int testSetValue(BigInt * obj);
+int testAdd(void);
 
 int main(void)
 {
@@ -26,6 +27,8 @@ int main(void)
 	
 	freeBigInt(obj);
 	
+	err += doTest(testAdd(), "add()");
+	
 	if (err)
 	{
 		printf("BigInt module failed %i test", err);
@@ -45,6 +48,11 @@ int doTest(int test, char * methodName)
 	if (test)
 	{
 		printf("failure during test of %s\n", methodName);
+	}
+	
+	else
+	{
+		printf("%s passed tests\n", methodName);
 	}
 	
 	return test;
@@ -72,13 +80,66 @@ int testSetValue(BigInt * obj)
 	
 	if (obj->length != chunks)
 	{
-		printf("  setValue(): chunk count mismatch.);
+		printf("  setValue(): chunk count mismatch.");
 		printf(" Is %i, should be %i\n", obj->length, chunks);
+		return 1;
 	}
 	
-	
+	return 0;
 	
 }
+
+int testAdd(void)
+{
+	BigInt * bi1 = newBigInt();
+	BigInt * bi2 = newBigInt();
+	
+	int array1[1000];
+	int array2[1000];
+	int i;
+	
+	for (i = 0; i < 1000; i++)
+	{
+		array1[i] = i;
+		array2[i] = 1000 - i;
+	}
+	
+	setValue(bi1, 1000, array1);
+	setValue(bi2, 1000, array2);
+	add(bi1, bi2);
+	
+	i = 0;
+	int err = 0;
+	int j;
+	BigIntChunk * chunk = bi1->first;
+	while (chunk)
+	{
+		
+		for (j = 0; j < chunk->length; j++)
+		{
+			if (chunk->value[j] != 1000)
+			{
+				printf("  error at position %i of 1000 in add():", i);
+				printf(" value %i should be 1000\n", chunk->value[j]);
+				err += 1;
+			}
+			i++;
+		}
+		
+		chunk = chunk->next;
+		
+	}
+	
+	if (err)
+	{
+		printf("  add() method error count: %i\n", err);
+		return 1;
+	}
+	
+	return 0;
+}
+
+
 
 
 
