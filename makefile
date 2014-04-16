@@ -2,8 +2,9 @@
 SETUP = python2 setup.py
 SRC = src/pymath.c src/pymath.h src/divides.c
 MOD = pymath.so
-TEXC = build/test/tBI.x
-TOBJ = build/test/testBigInt.o
+TDIR = build/test
+TEXE = ${TDIR}/tBI.x
+TOBJ = ${TDIR}/testBigInt.o
 
 all: clean ${MOD}
 
@@ -16,20 +17,33 @@ ${MOD}: ${SRC}
 install:
 	${SETUP} install
 
-test: ${TEXC}
-	./build/test/tBI.x
+test: ${TEXE}
+	@echo
+	@echo "running Big Int tests:"
+	@echo
+	@./${TDIR}/tBI.x
+	@echo
 
-build/test/tBI.x: build/test/testBigInt.o
-	gcc -o $@ $< build/BigInt.o
+${TDIR}/tBI.x: ${TDIR}/testBigInt.o ${TDIR}/BigInt.o
+	gcc -o $@ $^
 
-build/test/testBigInt.o: test/testBigInt.c src/BigInt.c src/BigInt.h
+${TDIR}/testBigInt.o: test/testBigInt.c src/BigInt.h
 	mkdir -p build/test
 	gcc -c -o $@ $<
-	gcc -c -o build/BigInt.o src/BigInt.c
+
+${TDIR}/BigInt.o: src/BigInt.c src/BigInt.h
+	mkdir -p build/test
+	gcc -c -o $@ $<
 
 clean:
-	@echo "cleaning..."
+	@echo "cleaning module..."
 	${SETUP} clean --all
-	@rm -f pymath.so
+	rm -f pymath.so
+	@echo
+	@echo "cleaning build directory"
+	rm -rf build
+	@echo
+	@echo "All Done!"
+	@echo
 
 	
