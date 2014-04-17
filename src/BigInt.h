@@ -9,6 +9,7 @@
 
 typedef struct BigIntChunk BigIntChunk;
 typedef struct BigInt BigInt;
+typedef struct EnumeratedBigInt EnumeratedBigInt;
 
 
 
@@ -25,9 +26,12 @@ void freeBigInt(BigInt * object);
  *  @param length the length of the value array
  *  @param value a little endian list of int values representing the value
  */
-int setValue(BigInt * self, int length, int * value); // value is a little endian list of ints
+int setValue(BigInt * self, int length, int * value);
 char * toString(BigInt * self);
 BigInt * add(BigInt * self, BigInt * bi);
+
+EnumeratedBigInt * enumerate(BigInt * obj);
+int * next(EnumeratedBigInt * self);
 
 
 
@@ -49,6 +53,13 @@ struct BigInt
 	BigIntChunk *first;
 	BigIntChunk *last;
 	int length; //length in chunks
+};
+
+struct EnumeratedBigInt
+{
+	BigInt * obj;
+	BigIntChunk * chunk;
+	int index;
 };
 
 

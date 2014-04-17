@@ -3,6 +3,9 @@
 
 #define ERROR(x) if(x) return 1
 
+
+
+
 /* ##### private method declarations ##### */
 
 static void reset(BigInt * self);
@@ -324,5 +327,33 @@ static BigIntChunk * newChunk(void)
 	self->next = NULL;
 	self->length = 0;
 	return self;
+}
+
+
+/* Enumerated Big Int definitions */
+EnumeratedBigInt * enumerate(BigInt * obj)
+{
+	EnumeratedBigInt * self = (EnumeratedBigInt *) malloc(sizeof(EnumeratedBigInt));
+	self->obj = obj;
+	self->chunk = obj->first;
+	self->index = 0;
+}
+
+int * next(EnumeratedBigInt * self)
+{
+	if (self == NULL) return NULL;
+	
+	while (self->index != self->chunk->length)
+	{
+		if (self->chunk->next = NULL)
+		{
+			return NULL;
+		}
+		
+		self->index = 0;
+		self->chunk = self->chunk->next;
+	}
+	
+	return &( self->chunk->value[ self->index++ ] );
 }
 
