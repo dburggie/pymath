@@ -11,6 +11,7 @@
 static void reset(BigInt * self);
 static int append(BigInt * self, BigIntChunk * chunk);
 static BigIntChunk * newChunk(void);
+static BigIntChunk * trim(BigIntChunk * self);
 
 static char hex[] = {
 		'0', '1', '2', '3', '4', '5', '6', '7',
@@ -316,16 +317,36 @@ static int append(BigInt * self, BigIntChunk * chunk)
 static BigIntChunk * newChunk(void)
 {
 	BigIntChunk * self = (BigIntChunk *)malloc(sizeof(BigIntChunk));
-	if (!self)
+	if (self == NULL)
 	{
 		printf("malloc fail in private method newChunk in BigInt.c");
-		return self;
+		return NULL;
 	}
 	
 	
 	self->prev = NULL;
 	self->next = NULL;
 	self->length = 0;
+	return self;
+}
+
+
+static BigIntChunk * trim(BigIntChunk * self)
+{
+	
+	if (self == NULL) return NULL;
+	
+	BigIntChunk * current = self->next;
+	BigIntChunk * next;
+	
+	while (current != NULL)
+	{
+		next = current->next;
+		free(current);
+		current = next;
+	}
+	
+	self->next = NULL;
 	return self;
 }
 
