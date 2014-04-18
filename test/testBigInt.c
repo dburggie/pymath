@@ -94,33 +94,35 @@ int testAdd(void)
 	BigInt * bi1 = newBigInt();
 	BigInt * bi2 = newBigInt();
 	
-	int array1[1000];
-	int array2[1000];
+	int size = 10;
+	
+	int array1[size];
+	int array2[size];
 	int i;
 	
-	for (i = 0; i < 1000; i++)
+	for (i = 0; i < size; i++)
 	{
 		array1[i] = i;
-		array2[i] = 1000 - i;
+		array2[i] = size - i;
 	}
 	
-	setValue(bi1, 1000, array1);
-	setValue(bi2, 1000, array2);
+	setValue(bi1, size, array1);
+	setValue(bi2, size, array2);
 	add(bi1, bi2);
 	
 	i = 0;
 	int err = 0;
-	int j;
+	int j, chunkcount = 0;
 	BigIntChunk * chunk = bi1->first;
 	while (chunk)
 	{
-		
+		printf("testing add operation in chunk %i\n", chunkcount++);
 		for (j = 0; j < chunk->length; j++)
 		{
-			if (chunk->value[j] != 1000)
+			if (chunk->value[j] != size)
 			{
-				printf("  error at position %i of 1000 in add():", i);
-				printf(" value %i should be 1000\n", chunk->value[j]);
+				printf("  error at position %i of %i in add():", i, size);
+				printf(" value %i should be %i\n", chunk->value[j], size);
 				err += 1;
 			}
 			i++;

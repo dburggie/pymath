@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #define ERROR(x) if(x) return 1
+#define BIGINT_DEBUG
 
 
 /* ##### private method declarations ##### */
@@ -27,10 +28,10 @@ BigInt * newBigInt(void)
 	
 	//allocate memory
 	BigInt * object = (BigInt *) malloc(sizeof(BigInt));
-	if (object == NULL) { return NULL; }
+	if (!object) { return NULL; }
 	
 	BigIntChunk * chunk = (BigIntChunk *) malloc(sizeof(BigIntChunk));
-	if (chunk == NULL) { free(object); return NULL; }
+	if (!chunk) { free(object); return NULL; }
 	
 	//initialize data
 	object->first = chunk;
@@ -50,7 +51,7 @@ BigInt * newBigInt(void)
 void freeBigInt(BigInt * object)
 {
 	//let's avoid freeing a null pointer
-	if (object == NULL) return;
+	if (!object) return;
 	
 	//delete all the chunks
 	BigIntChunk * chunk = object->first;
@@ -186,9 +187,23 @@ char * toString(BigInt * self)
 BigInt * add(BigInt * self, BigInt * bi)
 {
 	
-	if (self == NULL || bi == NULL) return NULL;
+	if (!self || !bi)
+	{
+		#ifdef BIGINT_DEBUG
+		printf("Error calling add() method. Null argument passed.\n");
+		#endif
+
+		return NULL;
+	}
 	
-	if (self->first == NULL) append(self, newChunk());
+	if (!self->first)
+	{
+		#ifdef BIGINT_DEBUG
+		printf("Error calling add() method. Object has no first chunk.\n");
+		#endif
+		
+		append(self, newChunk());
+	}
 	
 	//setup location in sum
 	BigIntChunk * chunk = self->first;
@@ -209,16 +224,30 @@ BigInt * add(BigInt * self, BigInt * bi)
 				chunk = chunk->next;
 			}
 			
-			else if (chunk->length < CHUNKWIDTH)
+			else if (index < CHUNKWIDTH)
 			{
+				chunk->length = index + 1;
+				chunk->value[index] = 0;
+				printf("extending within chunk, now %i wide\n", index);
+			}
+			
+			else
+			{
+				append(self, newChunk());
+				chunk = self->last;
 				chunk->length++;
+				index = 0;
+				printf("appending a new chunk\n");
 			}
 		}
 		
 		
 		value = *p;
 		addWithCarry(self,chunk,index++,value);
+		p = next(iterator);
 	}
+	
+	return self;
 	
 }
 
@@ -256,7 +285,7 @@ static int append(BigInt * self, BigIntChunk * chunk)
 static BigIntChunk * newChunk(void)
 {
 	BigIntChunk * self = (BigIntChunk *)malloc(sizeof(BigIntChunk));
-	if (self == NULL)
+	if (!self)
 	{
 		printf("malloc fail in private method newChunk in BigInt.c");
 		return NULL;
@@ -273,7 +302,7 @@ static BigIntChunk * newChunk(void)
 static BigIntChunk * trim(BigIntChunk * self)
 {
 	
-	if (self == NULL) return NULL;
+	if (!self) return NULL;
 	
 	BigIntChunk * current = self->next;
 	BigIntChunk * next;
@@ -292,8 +321,28 @@ static BigIntChunk * trim(BigIntChunk * self)
 
 static BigInt * addWithCarry(BigInt * self, BigIntChunk * chunk, int index, int i)
 {
+	
+	if (!self)
+	{
+		#ifdef BIGINT_DEBUG
+		printf("error calling static addWithCarry(): self null.\n");
+		#endif
+		
+		return NULL;
+	}
+	
+	if (!chunk)
+	{
+		#ifdef BIGINT_DEBUG
+		printf("error calling static addWithCarry(): chunk null.\n");
+		#endif
+		
+		return NULL;
+	}
+	
+	
 	long long sum;
-	int carry = i;
+	long long carry = (long long) i;
 	
 	do {
 		
@@ -303,7 +352,7 @@ static BigInt * addWithCarry(BigInt * self, BigIntChunk * chunk, int index, int 
 			//switch to next chunk
 			index = 0;
 			
-			if (chunk->next == NULL)
+			if (!chunk->next)
 			{
 				append(self, newChunk());
 			}
@@ -317,9 +366,9 @@ static BigInt * addWithCarry(BigInt * self, BigIntChunk * chunk, int index, int 
 			chunk->value[index] = 0;
 		}
 		
-		sum = (long long) (chunk->value[index] + carry);
+		sum = (chunk->value[index] + carry);
 		chunk->value[index++] = (int) ( sum && 0xffffffffL );
-		carry = (int) (sum >> 32);
+		carry = sum >> 32;
 		
 	
 	} while (carry != 0);
@@ -332,18 +381,36 @@ static BigInt * addWithCarry(BigInt * self, BigIntChunk * chunk, int index, int 
 EnumeratedBigInt * enumerate(BigInt * obj)
 {
 	EnumeratedBigInt * self = (EnumeratedBigInt *) malloc(sizeof(EnumeratedBigInt));
+	if (!self) 
+	{
+		#ifdef BIGINT_DEBUG
+		printf("error allocating memory in enumerate() method.\n");
+		#endif
+		
+		return NULL;
+	}
+	
 	self->obj = obj;
 	self->chunk = obj->first;
 	self->index = 0;
+	
+	return self;
 }
 
 int * next(EnumeratedBigInt * self)
 {
-	if (self == NULL) return NULL;
-	
-	while (self->index != self->chunk->length)
+	if (!self)
 	{
-		if (self->chunk->next = NULL)
+		#ifdef BIGINT_DEBUG
+		printf("error calling next(). null enumeration.\n");
+		#endif
+		
+		return NULL;
+	}
+	
+	while (self->index == self->chunk->length)
+	{
+		if (!self->chunk->next)
 		{
 			return NULL;
 		}
