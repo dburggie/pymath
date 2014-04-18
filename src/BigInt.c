@@ -4,14 +4,13 @@
 #define ERROR(x) if(x) return 1
 
 
-
-
 /* ##### private method declarations ##### */
 
 static void reset(BigInt * self);
 static int append(BigInt * self, BigIntChunk * chunk);
 static BigIntChunk * newChunk(void);
 static BigIntChunk * trim(BigIntChunk * self);
+static BigInt * addWithCarry(BigInt * self, BigIntChunk * chunk, int index, int i);
 
 static char hex[] = {
 		'0', '1', '2', '3', '4', '5', '6', '7',
@@ -187,99 +186,39 @@ char * toString(BigInt * self)
 BigInt * add(BigInt * self, BigInt * bi)
 {
 	
-	if (!self || !bi) return NULL;
+	if (self == NULL || bi == NULL) return NULL;
 	
-	BigIntChunk * sChunk = self->first;
-	BigIntChunk * bChunk = bi->first;
+	if (self->first == NULL) append(self, newChunk());
 	
-	if (!sChunk || !bChunk) return NULL;
+	//setup location in sum
+	BigIntChunk * chunk = self->first;
+	int index = 0;
 	
-	long long sum = 0, carry = 0;
-	int sIndex = 0, bIndex = 0;
+	//enumerate what we're adding
+	EnumeratedBigInt * iterator = enumerate(bi);
+	int * p = next(iterator);
+	int value;
 	
-	while (1)
+	while (p != NULL)
 	{
-		if (sIndex == sChunk->length)
+		while (index == chunk->length)
 		{
-			if (sIndex < CHUNKWIDTH)
+			if (chunk->next != NULL)
 			{
-				sChunk->value[sIndex] = 0;
-				sChunk->length++;
+				index = 0;
+				chunk = chunk->next;
 			}
 			
-			else if (sChunk->next != NULL)
+			else if (chunk->length < CHUNKWIDTH)
 			{
-				sIndex = 0;
-				sChunk = sChunk->next;
-			}
-			
-			else
-			{
-				append(self, newChunk());
-				sIndex = 0;
+				chunk->length++;
 			}
 		}
 		
 		
-		// check if more to add
-		if (bIndex == bChunk->length)
-		{
-			if (bChunk->next != NULL)
-			{
-				bIndex = 0;
-				bChunk = bChunk->next;
-			}
-			
-			else
-			{
-				while (carry > 0)
-				{
-					sum = carry;
-					sum += (long long) sChunk->value[sIndex];
-					sChunk->value[sIndex] = (int) (sum & 0xffffffff);
-					sIndex++;
-					carry = sum >> 32;
-					
-					//increment sIndex		
-					if (sIndex == sChunk->length)
-					{
-						
-						if (sIndex < CHUNKWIDTH)
-						{
-							sChunk->value[sIndex] = 0;
-							sChunk->length++;
-						}
-						
-						else if (sChunk->next != NULL)
-						{
-							sIndex = 0;
-							sChunk = sChunk->next;
-						}
-						
-						else
-						{
-							append(self, newChunk());
-							sIndex = 0;
-						}
-					}//done incrementing sIndex
-					
-				}
-				
-				break;
-			}
-		}
-		
-		
-		sum = carry;
-		sum += (long long) sChunk->value[sIndex];
-		sum += (long long) bChunk->value[bIndex];
-		sChunk->value[sIndex] = sum & 0xffffffff;
-		carry = sum >> 32;
-		sIndex++; bIndex++;
-		
+		value = *p;
+		addWithCarry(self,chunk,index++,value);
 	}
-	
-	return self;
 	
 }
 
@@ -347,6 +286,44 @@ static BigIntChunk * trim(BigIntChunk * self)
 	}
 	
 	self->next = NULL;
+	return self;
+}
+
+
+static BigInt * addWithCarry(BigInt * self, BigIntChunk * chunk, int index, int i)
+{
+	long long sum;
+	int carry = i;
+	
+	do {
+		
+		
+		if (index >= CHUNKWIDTH)
+		{
+			//switch to next chunk
+			index = 0;
+			
+			if (chunk->next == NULL)
+			{
+				append(self, newChunk());
+			}
+			
+			chunk = chunk->next;
+		}
+		
+		if (index >= chunk->length) 
+		{
+			chunk->length = index;
+			chunk->value[index] = 0;
+		}
+		
+		sum = (long long) (chunk->value[index] + carry);
+		chunk->value[index++] = (int) ( sum && 0xffffffffL );
+		carry = (int) (sum >> 32);
+		
+	
+	} while (carry != 0);
+	
 	return self;
 }
 
